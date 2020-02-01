@@ -12,17 +12,12 @@ Download videos of posts on [5278](http://www.5278.cc/forum.php?gid=22).
 
 -   Copy `secret.py.dist` as `secret.py` in the same folder.
 
-"""
-    Usage:
-        python 5278_downloader.py *bookmark_path*
+```
+    python 5278_downloader.py *bookmark_path*
     
     Args:
         *bookmark_path*: Bookmark input path (a file including one URL per line).
-
-    Notice:
-        Put chromedriver.exe in folder /bin.
-        Copy secret.py.dist as secret.py in the same folder.
-"""
+```
 
 ## Requirements
 
