@@ -1,0 +1,7 @@
+*/__pycache__/*
+*/secret.py
+*.log
+results/*
+*.txt
+!conf/requirements.txt
+bin/chromedriver.exe
