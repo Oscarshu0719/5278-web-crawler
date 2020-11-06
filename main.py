@@ -10,6 +10,12 @@ import sys
 from time import sleep
 import traceback
 
+"""
+    Disable warning.
+"""
+import requests.packages.urllib3
+requests.packages.urllib3.disable_warnings()
+
 from src.browser import Browser
 from src.constants import *
 from src.exceptions import RetryException
@@ -18,13 +24,13 @@ from src.ts_downloader import concatenate_ts_files, download_ts_files, get_ts_ur
 
 """
     Usage:
-        python main.py *bookmark_path*
+        python main.py *urls_file*
     
     Args:
-        *bookmark_path*: Bookmark input path (a file including one URL per line).
+        *urls_file*: URLs input path (a file including one URL per line).
 
     Notice:
-        Put chromedriver.exe in folder /bin.
+        Put chromedriver[.exe] in folder /bin.
         Copy secret.py.dist as secret.py in the same folder.
 """
 
@@ -69,8 +75,8 @@ def set_cookies():
         cookies[cookie['name']] = cookie['value']
 
 def load_urls(path):
-    with open(path, 'r') as bookmarks:
-        return [bookmark.strip() for bookmark in bookmarks.readlines()]
+    with open(path, 'r') as file:
+        return [url.strip() for url in file.readlines() if re.match(PATTERN_POST, url)]
     
 def login():
     username = USERNAME
@@ -80,8 +86,6 @@ def login():
 
     agree_btn = browser.find_one('td a')
     agree_btn.click()
-
-    browser.close_new_tab()
 
     u_input = browser.find_one('input[name="username"]')
     u_input.send_keys(username)
@@ -100,10 +104,10 @@ def login():
 
     set_cookies()
 
-def web_crawler(bookmark_path):
+def web_crawler(urls_file):
     login()
 
-    urls = load_urls(bookmark_path)
+    urls = load_urls(urls_file)
 
     for i in range(len(urls)):
         print("\n{} - Info: Start downloading post \'{}\'. (Overall progress: {}/{})\n".format(
@@ -114,7 +118,7 @@ def web_crawler(bookmark_path):
         post_name = soup.select('meta[name="description"]')[0]["content"]
         post_name = ''.join(char for char in post_name if char not in INVALID_CHAR)
 
-        player_list = soup.select("#allmyplayer")
+        player_list = soup.select(".cc5278_player")
         video_src_list = [player["src"] for player in player_list]
 
         if not os.path.exists(TMP_DOWNLOAD_PATH):
@@ -126,7 +130,8 @@ def web_crawler(bookmark_path):
         headers = {
             "Referer": urls[i]
         }
-        for j in range(len(video_src_list)):
+        video_num = len(video_src_list)
+        for j in range(video_num):
             print("\n{} - Info: Start downloading video \'{}\'. (Progress of this post: {}/{})\n".format(
                 datetime.now().strftime("%Y-%m-%d %H:%M:%S"), video_src_list[j], (j + 1), len(video_src_list)))
             m3u8_src = get(video_src_list[j], headers=headers, cookies=cookies).text
@@ -138,7 +143,9 @@ def web_crawler(bookmark_path):
 
             max_no = download_ts_files(ts_urls, url_root, TMP_DOWNLOAD_PATH)
             if max_no != MSG_ERROR_DOWNLOAD:
-                filename = os.path.join(DOWNLOAD_PATH, '{}_{}'.format(post_name, str(j + 1)))
+                filename = os.path.join(DOWNLOAD_PATH, '{}'.format(post_name))
+                if video_num != 1:
+                    filename += '_{}'.format(post_name, str(j + 1))
                 while os.path.exists(filename):
                     msg = '{} - Warning: The file \'{}\' exists. Rename as \'{}\'.\n'.format(
                         datetime.now().strftime("%Y-%m-%d %H:%M:%S"), filename, filename + '_')
@@ -160,5 +167,5 @@ if __name__ == '__main__':
     browser = Browser(HAS_SCREEN)
     cookies = dict()
 
-    bookmark_path = sys.argv[1]
-    web_crawler(bookmark_path)
+    urls_file = sys.argv[1]
+    web_crawler(urls_file)

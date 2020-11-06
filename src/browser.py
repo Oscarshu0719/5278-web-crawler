@@ -14,7 +14,15 @@ from time import sleep
 
 
 class Browser:
+    """
+        Only support Chrome driver.
+    """
+    
     def __init__(self, has_screen):
+        chrome_driver_path = "chromedriver"
+        if os.name == "nt": # Windows.
+            chrome_driver_path += '.exe'
+
         dir_path = os.path.dirname(os.path.realpath(__file__))
         service_args = ["--ignore-ssl-errors=true"]
         chrome_options = Options()
@@ -23,10 +31,11 @@ class Browser:
         chrome_options.add_argument("--start-maximized")
         chrome_options.add_argument("--no-sandbox")
         self.driver = webdriver.Chrome(
-            executable_path=os.path.join(dir_path[: -3], "bin", "chromedriver.exe"),
+            executable_path=os.path.join(dir_path[: -3], "bin", chrome_driver_path),
             service_args=service_args,
             chrome_options=chrome_options,
         )
+        self.driver.minimize_window()
         self.driver.implicitly_wait(5)
 
     @property

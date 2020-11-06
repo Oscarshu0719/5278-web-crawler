@@ -4,4 +4,4 @@
 results/*
 *.txt
 !conf/requirements.txt
-bin/chromedriver.exe
+bin/chromedriver[\.exe]?

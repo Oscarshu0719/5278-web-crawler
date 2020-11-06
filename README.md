@@ -13,10 +13,10 @@ Download videos of posts on [5278](http://www.5278.cc/forum.php?gid=22).
 -   Copy `secret.py.dist` as `secret.py` in the same folder.
 
 ```
-python main.py *bookmark_path*
+python main.py *urls_file*
     
 Args:
-    *bookmark_path*: Bookmark input path (a file including one URL per line).
+    *urls_file*: URLs input path (a file including one URL per line).
 ```
 
 ## Requirements
